@@ -3,9 +3,8 @@ namespace snippy\debug\outputItems;
 
 use snippy\debug\cOutputItemTemplate;
 use snippy\debug\cHTMLFormater;
-use snippy\debug\iOutputItem;
 
-class cDump implements iOutputItem
+class cDump extends aBaseItem
 {
 	/**
 	 * @var string
@@ -47,6 +46,8 @@ class cDump implements iOutputItem
 
 		$tpl = new cOutputItemTemplate( cOutputItemTemplate::C_DEBUG );
 		$tpl->setContent( $content );
+		
+		$this->applyInvokePositionToTemplate( $tpl );
 
 		return $tpl->render( $formater );
 	}

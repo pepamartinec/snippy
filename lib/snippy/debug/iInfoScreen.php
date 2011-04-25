@@ -3,16 +3,6 @@ namespace snippy\debug;
 
 interface iInfoScreen
 {
-//	/**
-//	 * @var LH\Util\DevConsole\Formater
-//	 */
-//	protected $formater;
-//
-//	/**
-//	 * @var array
-//	 */
-//	protected $trace;
-
 	/**
 	 * Displays info screen
 	 */

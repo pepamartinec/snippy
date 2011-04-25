@@ -11,6 +11,7 @@
 
 ob_start();
 
+use snippy\debug\outputWriters\cExceptionScreenWriter;
 use snippy\debug\outputWriters\cBlackHoleWriter;
 use snippy\debug\outputItems\cException;
 use snippy\debug\cHTMLFormater;
@@ -24,10 +25,12 @@ define( 'ERROR_LEVEL', -1 );
 
 include_once 'common.php';
 
+$formater = new cHTMLFormater();
 cErrorHandler::init( array(
-	'writer' => new cBlackHoleWriter(),
-	'exceptionWriter' => cErrorHandler::EX_SCREEN,
-	'errorLevel' => E_ALL
+	'debugWriter' => new cInPageWriter( $formater ),
+	'errorLevel'  => E_ALL,
+
+	'exceptionWriter' => new cExceptionScreenWriter( $formater ),
 ) );
 
 
@@ -46,9 +49,9 @@ function a( $aa )
 function b( $x, cInfoScreen $y )
 {
 	trace();
-	throw new Exception('Let me say you something \'Hello\' :)');
-	
-	$a->display();
+	//throw new Exception('Let me say you something \'Hello\' :)');
+	fap();
+	//$y->display();
 }
 
 session_start();

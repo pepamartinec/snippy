@@ -6,7 +6,7 @@ interface iOutputWriter
 	/**
 	 * Writes debug item to output
 	 *
-	 * @param iItem $item
+	 * @param iOutputItem $item
 	 */
 	public function write( iOutputItem $item );
 }

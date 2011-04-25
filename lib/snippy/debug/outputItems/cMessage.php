@@ -3,9 +3,8 @@ namespace snippy\debug\outputItems;
 
 use snippy\debug\cOutputItemTemplate;
 use snippy\debug\cHTMLFormater;
-use snippy\debug\iOutputItem;
 
-class cMessage implements iOutputItem
+class cMessage extends aBaseItem
 {
 	const DEBUG = 'debug';
 	const INFO  = 'info';
@@ -63,6 +62,8 @@ class cMessage implements iOutputItem
 	{
 		$tpl = new cOutputItemTemplate( $this->level );
 		$tpl->setContent( $this->content );
+		
+		$this->applyInvokePositionToTemplate( $tpl );
 
 		return $tpl->render( $formater );
 	}

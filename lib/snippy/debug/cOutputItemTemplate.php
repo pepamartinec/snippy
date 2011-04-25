@@ -1,7 +1,7 @@
 <?php
 namespace snippy\debug;
 
-class cOutputItemTemplate implements iOutputItem
+class cOutputItemTemplate
 {
 	const C_DEBUG = 'debug';
 	const C_INFO  = 'info';
@@ -46,7 +46,7 @@ class cOutputItemTemplate implements iOutputItem
 	/**
 	 * Constructor
 	 *
-	 * @param unknown_type $class
+	 * @param string $baseClass
 	 */
 	public function __construct( $baseClass )
 	{
@@ -140,7 +140,6 @@ class cOutputItemTemplate implements iOutputItem
 		$this->content = $content;
 		return $this;
 	}
-
 
 	/**
 	 * Renders and returns message content

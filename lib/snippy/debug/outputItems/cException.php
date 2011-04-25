@@ -3,9 +3,8 @@ namespace snippy\debug\outputItems;
 
 use snippy\debug\cOutputItemTemplate;
 use snippy\debug\cHTMLFormater;
-use snippy\debug\iOutputItem;
 
-class cException implements iOutputItem
+class cException extends aBaseItem
 {
 	/**
 	 * @var \cException
@@ -29,7 +28,7 @@ class cException implements iOutputItem
 	 */
 	public function getException()
 	{
-		return $this->content;
+		return $this->exception;
 	}
 
 	/**

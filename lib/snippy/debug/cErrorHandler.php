@@ -31,7 +31,12 @@ namespace snippy\debug {
 		/**
 		 * @var iOutputWriter
 		 */
-		protected $writer;
+		protected $debugWriter;
+		
+		/**
+		 * @var iOutputWriter
+		 */
+		protected $exceptionWriter;
 
 		/**
 		 * Contructor
@@ -42,40 +47,41 @@ namespace snippy\debug {
 		 */
 		protected function __construct( array $conf )
 		{
-			// writer
-			if( isset( $conf['writer'] ) === false ) {
-				throw new xErrorHandlerException('Writer conf is missing');
+			// error handler
+			if( isset( $conf['debugWriter'] ) === false ) {
+				throw new xErrorHandlerException('Error writer conf is missing');
 				
-			} elseif( $conf['writer'] instanceof iOutputWriter === false ) {
-				throw new xErrorHandlerException('Invalid writer type, \'iOutputWriter\' is expected');
+			} elseif( $conf['debugWriter'] instanceof iOutputWriter === false ) {
+				throw new xErrorHandlerException('Invalid error writer type, \'iOutputWriter\' is expected');
 			}
 			
-			$this->writer = $conf['writer'];
+			$this->debugWriter = $conf['debugWriter'];
+			
+			$errorLevel = ( isset( $conf['errorLevel'] ) ) ? $conf['errorLevel'] : E_ALL;
+			set_error_handler( array( $this, 'debugCallback' ), $errorLevel & ~E_UNCATCHABLE );
+			set_error_handler( array( $this, 'errorCallback' ), $errorLevel & E_UNCATCHABLE );
+			register_shutdown_function( array( $this, 'shutdownCallback' ) );
+			
+			// exception handler
+			if( isset( $conf['exceptionWriter'] ) === false ) {
+				throw new xErrorHandlerException('Exception writer conf is missing');
+				
+			} elseif( $conf['exceptionWriter'] instanceof iOutputWriter === false ) {
+				throw new xErrorHandlerException('Invalid exception writer type, \'iOutputWriter\' is expected');
+			}
+			
+			$this->exceptionWriter = $conf['exceptionWriter'];
 
-			// register handlers
-			$errorLevel = ( isset( $conf['errorLevel'] ) ) ? $conf['errorLevel'] : -1;
-			set_error_handler( array( $this, 'errorWriteItem' ), $errorLevel );
+			set_exception_handler( array( $this, 'exceptionCallback' ) );
 			
-			switch( $conf['exceptionWriter'] ) {
-				default:
-				case self::EX_SCREEN:
-					set_exception_handler( array( $this, 'exceptionDisplayScreen' ) );
-					break;
-					
-				case self::EX_STANDARD:
-					set_exception_handler( array( $this, 'exceptionWriteItem' ) );
-					break;
-			}
-			
-			register_shutdown_function( array( $this, 'shutdownHandle' ) );
 			
 			// override default PHP error reporting and XDebug
-//			ini_set( 'error_reporting', 0 );
-//			ini_set( 'display_errors', false );
-//			ini_set( 'track_errors', 1 );
-//			if( is_callable( 'xdebug_disable' ) ) {
-//				xdebug_disable();
-//			}
+			ini_set( 'error_reporting', 0 );
+			ini_set( 'display_errors', false );
+			ini_set( 'track_errors', 1 );
+			if( is_callable( 'xdebug_disable' ) ) {
+				xdebug_disable();
+			}
 		}
 		
 		/**
@@ -104,49 +110,52 @@ namespace snippy\debug {
 		{
 			// check instance
 			if( self::$instance === null ) {
-				throw new \Exception('handler not initilaized yet'); //TODO custom exception
+				throw new xErrorHandlerException('Handler has not been initialized yet');
 			}
 
-			return self::$instance->writer->write( $item );
+			return self::$instance->debugWriter->write( $item );
 		}
 
 		/**
-		 * Writes catched error to default writer
+		 * Writes catched noticec & warnings to debug writer
 		 *
 		 * @param integer $type
 		 * @param string $message
 		 * @param string $file
 		 * @param integer $line
 		 */
-		public function errorWriteItem( $type, $message, $file, $line, $context )
+		public function debugCallback( $type, $message, $file, $line, $context )
 		{
 			$trace = debug_backtrace();
 			$top   = array_shift( $trace );
 
 			$item = new outputItems\cSystemMessage( $type, $message, $file, $line, $context, $trace );
-			$this->writer->write( $item );
-		}
-
-		/**
-		 * Writes catched exceptions to default writer
-		 *
-		 * @param Exception $exception
-		 */
-		public function exceptionWriteItem( \Exception $exception )
-		{
-			$item = new outputItems\cException( $exception );
-			$this->writer->write( $item );
+			$this->debugWriter->write( $item );
 		}
 		
 		/**
-		 * Displays catched exception on ExceptionScreen
+		 * Writes catched error to exception writer
+		 *
+		 * @param integer $type
+		 * @param string $message
+		 * @param string $file
+		 * @param integer $line
+		 */
+		public function errorCallback( $type, $message, $file, $line, $context )
+		{
+			$item = new outputItems\cException( new \ErrorException( $message, 0, $type, $file, $line ) );
+			$this->exceptionWriter->write( $item );
+		}
+
+		/**
+		 * Writes catched exceptions to exception writer
 		 *
 		 * @param Exception $exception
 		 */
-		public function exceptionDisplayScreen( \Exception $exception )
+		public function exceptionCallback( \Exception $exception )
 		{
-			$screen = new cExceptionScreen( new cHTMLFormater(), $exception );
-			$screen->display();
+			$item = new outputItems\cException( $exception );
+			$this->exceptionWriter->write( $item );
 		}
 
 		/**
@@ -154,19 +163,19 @@ namespace snippy\debug {
 		 *
 		 * Workaround for catching fatal errors
 		 */
-		public function shutdownHandle()
+		public function shutdownCallback()
 		{
 			$err = error_get_last();
 
 			if( $err && ( $err['type'] & E_UNCATCHABLE ) ) {
-				$item = new outputItems\cSystemMessage( $err['type'], $err['message'], $err['file'], $err['line'] );
-				$this->writer->write( $item );
+				$item = new outputItems\cException( new \ErrorException( $err['message'], 0, $err['type'], $err['file'], $err['line'] ) );
+				$this->exceptionWriter->write( $item );
 
 				// destructors are not called when fatal error occurs
 				// workaround for valid logWriter shutdown
 				// eg. in case of some caching/lazy-writing mechanism use
-				if( is_callable( array( $this->writer, '__destruct' ) ) ) {
-					$this->writer->__destruct();
+				if( is_callable( array( $this->exceptionWriter, '__destruct' ) ) ) {
+					$this->exceptionWriter->__destruct();
 				}
 			}
 		}
@@ -202,6 +211,10 @@ namespace {
 	{
 		$item = new cDump( func_get_args() );
 
+		$trace = debug_backtrace();
+		$top   = array_shift( $trace );
+		$item->setInvokePosition( $top['file'], $top['line'] );
+		
 		cErrorHandler::write( $item );
 	}
 
@@ -213,6 +226,10 @@ namespace {
 	function info( $message )
 	{
 		$item = new cMessage( cMessage::DEBUG, $message );
+		
+		$trace = debug_backtrace();
+		$top   = array_shift( $trace );
+		$item->setInvokePosition( $top['file'], $top['line'] );
 
 		cErrorHandler::write( $item );
 	}

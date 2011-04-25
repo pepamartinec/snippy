@@ -3,9 +3,8 @@ namespace snippy\debug\outputItems;
 
 use snippy\debug\cOutputItemTemplate;
 use snippy\debug\cHTMLFormater;
-use snippy\debug\iOutputItem;
 
-class cSystemMessage implements iOutputItem
+class cSystemMessage extends aBaseItem
 {
 	/**
 	 * @var int
