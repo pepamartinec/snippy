@@ -11,6 +11,7 @@
 
 ob_start();
 
+use snippy\debug\outputWriters\cBlackHoleWriter;
 use snippy\debug\outputItems\cException;
 use snippy\debug\cHTMLFormater;
 use snippy\debug\outputWriters\cInPageWriter;
@@ -23,16 +24,17 @@ define( 'ERROR_LEVEL', -1 );
 
 include_once 'common.php';
 
-$formater = new cHTMLFormater();
-$debugWriter = new cInPageWriter( $formater );
-//$debugWriter = new DebugPanel( $formater );
-$errHandler = new cErrorHandler( $debugWriter );
-
-//$dc = DevConsole::getInstance();
-//$dc->addPanel( $debugWriter );
+cErrorHandler::init( array(
+	'writer' => new cBlackHoleWriter(),
+	'exceptionWriter' => cErrorHandler::EX_SCREEN,
+	'errorLevel' => E_ALL
+) );
 
 
-// test inPage trace
+
+
+$c = $d + 7;
+
 function a( $aa )
 {
 	$formater = new cHTMLFormater();
@@ -52,6 +54,7 @@ function b( $x, cInfoScreen $y )
 session_start();
 
 a( array( 1 => 5, 7 => array( 5,3,4 ) ) );
+
 
 
 $conf = array(

@@ -2,7 +2,6 @@
 namespace snippy\debug {
 
 	use snippy\debug\screens\cExceptionScreen;
-
 	use snippy\debug\outputItems\cMessage;
 
 	if( defined( 'DEBUG' ) !== true ) {
@@ -21,6 +20,9 @@ namespace snippy\debug {
 	 */
 	class cErrorHandler
 	{
+		const EX_STANDARD = 'standard';
+		const EX_SCREEN   = 'screen';
+		
 		/**
 		 * @var cErrorHandler
 		 */
@@ -34,31 +36,63 @@ namespace snippy\debug {
 		/**
 		 * Contructor
 		 *
-		 * @param iOutputWriter $writer
+		 * @param array $conf
+		 *
+		 * @throws xErrorHandlerException
 		 */
-		public function __construct( iOutputWriter $writer )
+		protected function __construct( array $conf )
 		{
-			$this->writer = $writer;
+			// writer
+			if( isset( $conf['writer'] ) === false ) {
+				throw new xErrorHandlerException('Writer conf is missing');
+				
+			} elseif( $conf['writer'] instanceof iOutputWriter === false ) {
+				throw new xErrorHandlerException('Invalid writer type, \'iOutputWriter\' is expected');
+			}
+			
+			$this->writer = $conf['writer'];
 
+			// register handlers
+			$errorLevel = ( isset( $conf['errorLevel'] ) ) ? $conf['errorLevel'] : -1;
+			set_error_handler( array( $this, 'errorWriteItem' ), $errorLevel );
+			
+			switch( $conf['exceptionWriter'] ) {
+				default:
+				case self::EX_SCREEN:
+					set_exception_handler( array( $this, 'exceptionDisplayScreen' ) );
+					break;
+					
+				case self::EX_STANDARD:
+					set_exception_handler( array( $this, 'exceptionWriteItem' ) );
+					break;
+			}
+			
+			register_shutdown_function( array( $this, 'shutdownHandle' ) );
+			
+			// override default PHP error reporting and XDebug
+//			ini_set( 'error_reporting', 0 );
+//			ini_set( 'display_errors', false );
+//			ini_set( 'track_errors', 1 );
+//			if( is_callable( 'xdebug_disable' ) ) {
+//				xdebug_disable();
+//			}
+		}
+		
+		/**
+		 * Initializes error handler
+		 *
+		 * @param array $conf
+		 *
+		 * @throws xErrorHandlerException
+		 */
+		public static function init( array $conf )
+		{
 			// check instance
 			if( self::$instance !== null ) {
-				throw new \Exception('handler already initilaized'); //TODO custom exception
+				throw new xErrorHandlerException('Handler has already been initilaized');
 			}
 
-			self::$instance = $this;
-
-			// override default PHP error reporting and XDebug
-			ini_set( 'error_reporting', 0 );
-			ini_set( 'display_errors', false );
-			ini_set( 'track_errors', 1 );
-			if( is_callable( 'xdebug_disable' ) ) {
-				xdebug_disable();
-			}
-
-			// register various handlers
-			set_error_handler( array( $this, 'errorWriteItem' ), ERROR_LEVEL );
-			set_exception_handler( array( $this, 'exceptionDisplayScreen' ) );
-			register_shutdown_function( array( $this, 'shutdownHandle' ) );
+			self::$instance = new self( $conf );
 		}
 
 		/**
