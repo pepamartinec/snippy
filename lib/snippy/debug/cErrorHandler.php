@@ -20,9 +20,6 @@ namespace snippy\debug {
 	 */
 	class cErrorHandler
 	{
-		const EX_STANDARD = 'standard';
-		const EX_SCREEN   = 'screen';
-		
 		/**
 		 * @var cErrorHandler
 		 */
@@ -58,10 +55,9 @@ namespace snippy\debug {
 			$this->debugWriter = $conf['debugWriter'];
 			
 			$errorLevel = ( isset( $conf['errorLevel'] ) ) ? $conf['errorLevel'] : E_ALL;
-			set_error_handler( array( $this, 'debugCallback' ), $errorLevel & ~E_UNCATCHABLE );
-			set_error_handler( array( $this, 'errorCallback' ), $errorLevel & E_UNCATCHABLE );
+			set_error_handler( array( $this, 'errorCallback' ), $errorLevel );
 			register_shutdown_function( array( $this, 'shutdownCallback' ) );
-			
+
 			// exception handler
 			if( isset( $conf['exceptionWriter'] ) === false ) {
 				throw new xErrorHandlerException('Exception writer conf is missing');
@@ -124,27 +120,19 @@ namespace snippy\debug {
 		 * @param string $file
 		 * @param integer $line
 		 */
-		public function debugCallback( $type, $message, $file, $line, $context )
-		{
-			$trace = debug_backtrace();
-			$top   = array_shift( $trace );
-
-			$item = new outputItems\cSystemMessage( $type, $message, $file, $line, $context, $trace );
-			$this->debugWriter->write( $item );
-		}
-		
-		/**
-		 * Writes catched error to exception writer
-		 *
-		 * @param integer $type
-		 * @param string $message
-		 * @param string $file
-		 * @param integer $line
-		 */
 		public function errorCallback( $type, $message, $file, $line, $context )
 		{
-			$item = new outputItems\cException( new \ErrorException( $message, 0, $type, $file, $line ) );
-			$this->exceptionWriter->write( $item );
+			if( $type & E_UNCATCHABLE ) {
+				$item = new outputItems\cException( new \ErrorException( $message, 0, $type, $file, $line ) );
+				$this->exceptionWriter->write( $item );
+				
+			} else {
+				$trace = debug_backtrace();
+				$top   = array_shift( $trace );
+	
+				$item = new outputItems\cSystemMessage( $type, $message, $file, $line, $context, $trace );
+				$this->debugWriter->write( $item );
+			}
 		}
 
 		/**
@@ -165,8 +153,9 @@ namespace snippy\debug {
 		 */
 		public function shutdownCallback()
 		{
-			$err = error_get_last();
 
+			$err = error_get_last();
+			
 			if( $err && ( $err['type'] & E_UNCATCHABLE ) ) {
 				$item = new outputItems\cException( new \ErrorException( $err['message'], 0, $err['type'], $err['file'], $err['line'] ) );
 				$this->exceptionWriter->write( $item );
