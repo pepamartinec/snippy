@@ -21,6 +21,8 @@ class cFileWriter extends aPlainTextWriter
 	 * Constructor
 	 *
 	 * @param string $outputFile
+	 *
+	 * @throws snippy\sysLog\xLogWriterException
 	 */
 	public function __construct( $moduleName, $outputFile )
 	{
@@ -40,7 +42,7 @@ class cFileWriter extends aPlainTextWriter
 	 *
 	 * @param string $item
 	 *
-	 * @throws snippy\sysLog\LogWriterException
+	 * @throws snippy\sysLog\xLogWriterException
 	 */
 	protected function write( $item )
 	{

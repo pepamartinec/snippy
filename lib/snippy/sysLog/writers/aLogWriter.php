@@ -44,7 +44,7 @@ abstract class aLogWriter implements iLogWriter
 	 * @param  int    $level
 	 * @return string
 	 *
-	 * @throws InvalidLogLevelException
+	 * @throws xInvalidLogLevelException
 	 */
 	public static function levelLabel( $level )
 	{
@@ -72,7 +72,7 @@ abstract class aLogWriter implements iLogWriter
 	 *
 	 * @param int $logLevel
 	 *
-	 * @throws InvalidLogLevelException
+	 * @throws xInvalidLogLevelException
 	 */
 	public function setLogLevel( $logLevel )
 	{
@@ -94,7 +94,7 @@ abstract class aLogWriter implements iLogWriter
 	 *
 	 * @param string $message
 	 *
-	 * @throws InvalidLogLevelException
+	 * @throws snippy\sysLog\xLogWriterException
 	 */
 	public function debug( $message )
 	{
@@ -110,7 +110,7 @@ abstract class aLogWriter implements iLogWriter
 	 *
 	 * @param string $message
 	 *
-	 * @throws InvalidLogLevelException
+	 * @throws snippy\sysLog\xLogWriterException
 	 */
 	public function warn( $message )
 	{
@@ -126,7 +126,7 @@ abstract class aLogWriter implements iLogWriter
 	 *
 	 * @param string $message
 	 *
-	 * @throws InvalidLogLevelException
+	 * @throws snippy\sysLog\xLogWriterException
 	 */
 	public function error( $message )
 	{

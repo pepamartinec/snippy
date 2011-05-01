@@ -107,17 +107,18 @@ class cLogFactory
 	 * @param  string     $moduleName
 	 * @return iLogWriter
 	 *
-	 * @throws LogFactoryException
-	 * @throws InvalidWriterTypeException
-	 * @throws InvalidConfException
+	 * @throws snippy\sysLog\xLogFactoryException
+	 * @throws snippy\sysLog\xInvalidConfException
 	 */
 	public static function getLog( $moduleName )
 	{
-		if( self::$instance === null )
+		if( self::$instance === null ) {
 			throw new xLogFactoryException( 'cLogFactory has to be initialized first' );
+		}
 
-		if( isset( self::$instance->writers[ $moduleName ] ) === false )
+		if( isset( self::$instance->writers[ $moduleName ] ) === false ) {
 			self::$instance->createWriter( $moduleName );
+		}
 
 		return self::$instance->writers[ $moduleName ];
 	}
@@ -127,7 +128,8 @@ class cLogFactory
 	 *
 	 * @param string $moduleName
 	 *
-	 * @throws InvalidConfException
+	 * @throws snippy\sysLog\xInvalidConfException
+	 * @throws snippy\sysLog\xWriterConstructionException
 	 */
 	protected function createWriter( $moduleName )
 	{
@@ -157,7 +159,7 @@ class cLogFactory
 				break;
 
 			default:
-				throw new xInvalidWriterTypeException( $conf['writer'] );
+				throw new xInvalidConfException( "Invalid writer type '{$conf['writer']}'" );
 		}
 
 		$this->writers[ $moduleName ] = $writer;
@@ -170,20 +172,22 @@ class cLogFactory
 	 * @param  array  $conf
 	 * @return Stream
 	 *
-	 * @throws snippy\sysLog\InvalidConfException
-	 * @throws snippy\sysLog\LogWriterException
+	 * @throws snippy\sysLog\xInvalidConfException
+	 * @throws snippy\sysLog\xWriterConstructionException
 	 */
 	protected function createFileWriter( $moduleName, array $conf )
 	{
-		if( !isset( $conf['outputFile'] ) )
+		if( !isset( $conf['outputFile'] ) ) {
 			throw new xInvalidConfException( "'output' configuration missing" );
+		}
 
 		// format output fileName
 		$outFormat = $conf['outputFile'];
 		$outDate   = $conf['outputFileDate'] ?: null;
 
-		if( strpos( $outFormat, '%D' ) !== false && $outDate === null )
+		if( strpos( $outFormat, '%D' ) !== false && $outDate === null ) {
 			throw new xInvalidConfException( "Missing dateFormat definition for output file" );
+		}
 
 		$outReplace = array(
 			'%S' => $this->sessionID,
@@ -194,11 +198,17 @@ class cLogFactory
 		$outFile = str_replace( array_keys( $outReplace ), $outReplace, $outFormat );
 
 		// create & setup writer
-		$writer  = new cFileWriter( $moduleName, $outFile );
-		$writer->setExternalPlaceholders( $outReplace );
+		try {
+			$writer = new cFileWriter( $moduleName, $outFile );
+			$writer->setExternalPlaceholders( $outReplace );
+			
+		} catch( xLogWriterException $e ) {
+			throw new xWriterConstructionException( 'Unable to created requested writer', null, $e );
+		}
 
-		if( isset( $conf['itemMask'] ) )
+		if( isset( $conf['itemMask'] ) ) {
 			$writer->setItemMask( $conf['itemMask'], $conf['itemMaskDate'] ?: null );
+		}
 
 		return $writer;
 	}
@@ -209,13 +219,16 @@ class cLogFactory
 	 * Internaly, just one writer instance is created, because
 	 * it can be safely shared between all clients
 	 *
-	 * @return BlackHole
+	 * @return cBlackHole
 	 */
 	protected function createBlackHoleWriter()
 	{
+		// writer can by shared
 		static $writer = null;
-		if( $writer === null )
+		
+		if( $writer === null ) {
 			$writer = new cBlackHole();
+		}
 
 		return $writer;
 	}

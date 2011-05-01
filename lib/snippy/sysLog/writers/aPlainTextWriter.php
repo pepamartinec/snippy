@@ -73,6 +73,8 @@ abstract class aPlainTextWriter extends aLogWriter
 	 *
 	 * @param string      $mask       log item mask
 	 * @param string|null $dateFormat format for date/time field
+	 *
+	 * @throws snippy\sysLog\xLogWriterException
 	 */
 	public function setItemMask( $mask, $dateFormat = null )
 	{
@@ -98,8 +100,8 @@ abstract class aPlainTextWriter extends aLogWriter
 	 * @param  string $message message content
 	 * @return int             unique message ID
 	 *
-	 * @throws snippy\sysLog\InvalidLogLevelException
-	 * @throws snippy\sysLog\LogWriterException
+	 * @throws snippy\sysLog\xInvalidLogLevelException
+	 * @throws snippy\sysLog\xLogWriterException
 	 */
 	public function log( $level, $message )
 	{
@@ -127,7 +129,7 @@ abstract class aPlainTextWriter extends aLogWriter
 	 *
 	 * @param string $item
 	 *
-	 * @throws snippy\sysLog\LogWriterException
+	 * @throws snippy\sysLog\xLogWriterException
 	 */
 	protected abstract function write( $item );
 }
