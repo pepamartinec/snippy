@@ -29,25 +29,18 @@ interface iLogWriter
 	/**
 	 * Logs given message at DEBUG level
 	 *
-	 * @param string $message
+	 * @param  string   $message message content
+	 * @return int|null          unique message ID
 	 *
 	 * @throws InvalidLogLevelException
 	 */
 	public function debug( $message );
 
 	/**
-	 * Logs given message at INFO level
-	 *
-	 * @param string $message
-	 *
-	 * @throws InvalidLogLevelException
-	 */
-	public function info( $message );
-
-	/**
 	 * Logs given message at WARN level
 	 *
-	 * @param string $message
+	 * @param  string   $message message content
+	 * @return int|null          unique message ID
 	 *
 	 * @throws InvalidLogLevelException
 	 */
@@ -56,7 +49,8 @@ interface iLogWriter
 	/**
 	 * Logs given message at ERROR level
 	 *
-	 * @param string $message
+	 * @param  string   $message message content
+	 * @return int|null          unique message ID
 	 *
 	 * @throws InvalidLogLevelException
 	 */
@@ -65,8 +59,9 @@ interface iLogWriter
 	/**
 	 * Logs given message
 	 *
-	 * @param int    $level
-	 * @param string $message
+	 * @param  int      $level   message level
+	 * @param  string   $message message content
+	 * @return int|null          unique message ID
 	 *
 	 * @throws snippy\sysLog\InvalidLogLevelException
 	 * @throws snippy\sysLog\LogWriterException

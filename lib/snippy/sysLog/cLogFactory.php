@@ -12,6 +12,8 @@ use snippy\sysLog\writers\cBlackHole;
  */
 class cLogFactory
 {
+	const LOG_GLOBAL = 'GLOBAL';
+	
 	/**
 	 * Configuration
 	 *

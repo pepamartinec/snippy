@@ -94,16 +94,19 @@ abstract class aPlainTextWriter extends aLogWriter
 	/**
 	 * Logs given message
 	 *
-	 * @param int    $level
-	 * @param string $message
+	 * @param  int    $level   message level
+	 * @param  string $message message content
+	 * @return int             unique message ID
 	 *
 	 * @throws snippy\sysLog\InvalidLogLevelException
 	 * @throws snippy\sysLog\LogWriterException
 	 */
 	public function log( $level, $message )
 	{
+		$msgID = uniqid();
+		
 		$replace = array(
-			'%i' => uniqid(),
+			'%i' => $msgID,
 			'%d' => date( $this->itemMaskDate ),
 			'%l' => self::levelLabel( $level ),
 			'%m' => $this->moduleName,
@@ -115,6 +118,8 @@ abstract class aPlainTextWriter extends aLogWriter
 		$message = str_replace( array_keys( $replace ), $replace, $message );
 
 		$this->write( $message );
+		
+		return $msgID;
 	}
 
 	/**

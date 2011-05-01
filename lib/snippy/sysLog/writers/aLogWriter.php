@@ -7,9 +7,9 @@ use snippy\sysLog\iLogWriter;
 abstract class aLogWriter implements iLogWriter
 {
 	const DEBUG = 1;
-	const INFO  = 2;
-	const WARN  = 3;
-	const ERROR = 4;
+	const WARN  = 2;
+	const ERROR = 3;
+	const NONE  = 4;
 
 	const DEFAULT_LEVEL = self::DEBUG;
 
@@ -34,8 +34,8 @@ abstract class aLogWriter implements iLogWriter
 	 */
 	public function __construct( $moduleName )
 	{
-		$this->moduleName   = $moduleName;
-		$this->logLevel = self::DEFAULT_LEVEL;
+		$this->moduleName = $moduleName;
+		$this->logLevel   = self::DEFAULT_LEVEL;
 	}
 
 	/**
@@ -50,9 +50,9 @@ abstract class aLogWriter implements iLogWriter
 	{
 		switch( $level ) {
 			case self::DEBUG: return 'DEBUG';
-			case self::INFO:  return 'INFO';
 			case self::WARN:  return 'WARN';
 			case self::ERROR: return 'ERROR';
+			case self::NONE:  return 'NONE';
 			default:          throw new xInvalidLogLevelException( $level );
 		}
 	}
@@ -98,25 +98,11 @@ abstract class aLogWriter implements iLogWriter
 	 */
 	public function debug( $message )
 	{
-		if( $this->logLevel > self::DEBUG )
-			return;
+		if( $this->logLevel > self::DEBUG ) {
+			return null;
+		}
 
-		$this->log( self::DEBUG, $message );
-	}
-
-	/**
-	 * Logs given message at INFO level
-	 *
-	 * @param string $message
-	 *
-	 * @throws InvalidLogLevelException
-	 */
-	public function info( $message )
-	{
-		if( $this->logLevel > self::INFO )
-			return;
-
-		$this->log( self::INFO, $message );
+		return $this->log( self::DEBUG, $message );
 	}
 
 	/**
@@ -128,10 +114,11 @@ abstract class aLogWriter implements iLogWriter
 	 */
 	public function warn( $message )
 	{
-		if( $this->logLevel > self::WARN )
-			return;
+		if( $this->logLevel > self::WARN ) {
+			return null;
+		}
 
-		$this->log( self::WARN, $message );
+		return $this->log( self::WARN, $message );
 	}
 
 	/**
@@ -143,6 +130,10 @@ abstract class aLogWriter implements iLogWriter
 	 */
 	public function error( $message )
 	{
-		$this->log( self::ERROR, $message );
+		if( $this->logLevel > self::ERROR ) {
+			return null;
+		}
+		
+		return $this->log( self::ERROR, $message );
 	}
 }

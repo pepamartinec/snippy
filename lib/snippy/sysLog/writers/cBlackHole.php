@@ -22,8 +22,12 @@ class cBlackHole extends aLogWriter
 	/**
 	 * Logs given message
 	 *
-	 * @param int         $level
-	 * @param string      $message
+	 * @param  int    $level   message level
+	 * @param  string $message message content
+	 * @return int             unique message ID
 	 */
-	public function log( $level, $message ) {}
+	public function log( $level, $message )
+	{
+		return null;
+	}
 }
