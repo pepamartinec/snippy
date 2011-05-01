@@ -117,22 +117,24 @@ class cLogFactory
 		if( self::$instance === null ) {
 			throw new xLogFactoryException( 'cLogFactory has to be initialized first' );
 		}
+		
+		$factory = self::$instance;
 
-		if( isset( self::$instance->writers[ $moduleName ] ) === false ) {
+		if( isset( $factory->writers[ $moduleName ] ) === false ) {
 			// get module conf
 			$confName = $moduleName;
-			while( isset( $this->conf[ $confName ] ) === false &&
+			while( isset( $factory->conf[ $confName ] ) === false &&
 				( $localNameLen = strrpos( $confName, '\\' ) ) !== false ) {
 	
 				$confName = substr( $confName, 0, $localNameLen );
 			}
 	
-			$conf = $this->conf[ $confName ] ?: $this->conf['default'];
+			$conf = $factory->conf[ $confName ] ?: $factory->conf['default'];
 			
-			self::$instance->writers[ $moduleName ] = new cLazyConstructWriterProxy( $this, $moduleName, $conf );
+			$factory->writers[ $moduleName ] = new cLazyConstructWriterProxy( $factory, $moduleName, $conf );
 		}
 
-		return self::$instance->writers[ $moduleName ];
+		return $factory->writers[ $moduleName ];
 	}
 	
 	/**
