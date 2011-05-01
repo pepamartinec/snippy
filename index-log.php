@@ -7,6 +7,7 @@
 </head>
 <body>
 <?php
+use snippy\debug\ideUrlGenerators\cEclipseGenerator;
 use snippy\sysLog\cLogFactory;
 
 ob_start();
@@ -20,7 +21,7 @@ use snippy\debug\outputWriters\cExceptionScreenWriter;
 use snippy\debug\outputWriters\cInPageWriter;
 use snippy\debug\cErrorHandler;
 
-$formater = new cHTMLFormater();
+$formater = new cHTMLFormater( new cEclipseGenerator( 'localhost:34567' ) );
 cErrorHandler::init( array(
 	'debugWriter' => new cInPageWriter( $formater ),
 	'errorLevel'  => E_ALL,

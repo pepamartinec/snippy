@@ -11,6 +11,8 @@
 
 ob_start();
 
+use snippy\debug\ideUrlGenerators\cNoIdeGenerator;
+use snippy\debug\ideUrlGenerators\cEclipseGenerator;
 use snippy\debug\outputWriters\cExceptionScreenWriter;
 use snippy\debug\outputWriters\cBlackHoleWriter;
 use snippy\debug\outputItems\cException;
@@ -27,10 +29,10 @@ include_once 'common.php';
 
 
 
-$formater = new cHTMLFormater();
+$formater = new cHTMLFormater( new cEclipseGenerator( 'localhost:34567' ) );
 cErrorHandler::init( array(
 	'debugWriter' => new cInPageWriter( $formater ),
-	'errorLevel'  => E_WARNING,
+	'errorLevel'  => E_ALL,
 
 	'exceptionWriter' => new cExceptionScreenWriter( $formater ),
 ) );
@@ -42,7 +44,7 @@ $c = $d + 7;
 
 function a( $aa )
 {
-	$formater = new cHTMLFormater();
+	$formater = new cHTMLFormater( new cEclipseGenerator( 'localhost:34567' ) );
 
 	$bs = new cInfoScreen( $formater );
 	b($formater, $bs);

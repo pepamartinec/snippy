@@ -5,8 +5,6 @@ class cHTMLFormater
 {
 	const ID_PREFIX = 'debugFormater_';
 
-	const OPEN_FILE_HANDLER = 'localhost:34567';
-	
 	/**
 	 * @var array
 	 */
@@ -26,17 +24,23 @@ class cHTMLFormater
 	 * @var int
 	 */
 	protected $dumpMaxLength;
+	
+	/**
+	 * @var iIdeUrlGenerator
+	 */
+	protected $ideUrlGenerator;
 
 	/**
 	 * Constructor
 	 *
 	 */
-	public function __construct()
+	public function __construct( iIdeUrlGenerator $urlGenerator )
 	{
 		$this->sourceCodeCache = array();
 		$this->elIDsCounter    = 0;
 		$this->dumpMaxDepth    = 5;
 		$this->dumpMaxLength   = 10;
+		$this->ideUrlGenerator = $urlGenerator;
 	}
 
 	/**
@@ -386,11 +390,11 @@ class cHTMLFormater
 		}
 		
 		if( $clickable === true ) {
-			$openServer = self::OPEN_FILE_HANDLER;
-			$openFile   = $_SERVER['DOCUMENT_ROOT'] .'/'. $filePath . $fileName;
-			$openLine   = max( 1, $line );
+			$url = $this->ideUrlGenerator->generateUrl( $filePath . $fileName, $line );
 			
-			$formated = "<a href=\"javascript:snippy_openFileInEditor('{$openServer}', '{$openFile}', {$openLine})\">{$formated}</a>";
+			if( $url !== null ) {
+				$formated = "<a href=\"javascript:snippy_openFileInEditor('{$url}')\">{$formated}</a>";
+			}
 		}
 
 		return "<span class=\"fileNameBlock\">{$formated}</span>";
