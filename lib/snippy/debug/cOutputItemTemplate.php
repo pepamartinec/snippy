@@ -3,9 +3,10 @@ namespace snippy\debug;
 
 class cOutputItemTemplate
 {
-	const C_DEBUG = 'debug';
-	const C_WARN  = 'warn';
-	const C_ERROR = 'error';
+	const C_DEBUG  = 'debug';
+	const C_NOTICE = 'notice';
+	const C_WARN   = 'warn';
+	const C_ERROR  = 'error';
 
 	/**
 	 * @var string
@@ -66,9 +67,10 @@ class cOutputItemTemplate
 	protected function getBaseIcon()
 	{
 		switch( $this->baseClass ) {
-			case self::C_DEBUG: return 'images/info.png';
-			case self::C_WARN:  return 'images/warning.png';
-			case self::C_ERROR: return 'images/error.png';
+			case self::C_DEBUG:  return null;
+			case self::C_NOTICE: return 'images/info.png';
+			case self::C_WARN:   return 'images/warning.png';
+			case self::C_ERROR:  return 'images/error.png';
 		}
 	}
 
@@ -144,7 +146,10 @@ class cOutputItemTemplate
 		}
 
 		echo "<div class=\"{$class}\">";
-		echo "<span class=\"title\">{$this->title}</span>";
+		
+		if( $this->title ) {
+			echo "<span class=\"title\">{$this->title}</span>";
+		}
 
 		$buttons = array();
 		$blocks  = array();

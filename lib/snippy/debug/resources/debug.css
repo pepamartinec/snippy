@@ -5,7 +5,7 @@
 .collapsed { display: none; }
 .debugItem { border: 1px solid #bbb; background-color: #fafafa; margin: 2px; padding: 7px; font-family: sans-serif; font-size: 12px; }
 
-.debugItem.debug { border: 1px solid #bbf; background: url('info.png') no-repeat 5px 5px #eeeeff; }
+.debugItem.notice { border: 1px solid #bbf; background: url('info.png') no-repeat 5px 5px #eeeeff; }
 .debugItem.warn { border: 1px solid #cc7; background: url('warning.png') no-repeat 5px 5px #ffc; }
 .debugItem.error,
 .debugItem.exception { border: 1px solid #fa9; background: url('error.png') no-repeat 5px 5px #fdc; }
@@ -13,7 +13,7 @@
 .debugItem > .title { display: block; float: left; min-height: 12px; margin-bottom: 5px; margin-left: 17px; font-weight: bold; }
 .debugItem > .fileLine { float: right; }
 .debugItem > .icon { float: left; margin: -1px 5px 0px -1px; }
-.debugItem > .content { display: block; clear: both; margin: 3px; }
+.debugItem > .content { display: block; clear: left; margin: 3px; }
 
 .debugItem a { color: inherit; text-decoration: none; }
 .debugItem a:hover { text-decoration: underline; }

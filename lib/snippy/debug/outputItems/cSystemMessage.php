@@ -69,7 +69,6 @@ class cSystemMessage extends aBaseItem
 			default:
 				return cOutputItemTemplate::C_ERROR;
 
-
 			case E_WARNING:
 			case E_CORE_WARNING:
 			case E_COMPILE_WARNING:
@@ -82,7 +81,7 @@ class cSystemMessage extends aBaseItem
 
 			case E_NOTICE:
 			case E_USER_NOTICE:
-				return cOutputItemTemplate::C_DEBUG;
+				return cOutputItemTemplate::C_NOTICE;
 		}
 	}
 
@@ -95,53 +94,22 @@ class cSystemMessage extends aBaseItem
 	protected static function getTypeName( $type )
 	{
 		switch( $type ) {
-			case E_ERROR:
-				return 'Fatal Error';
-
-			case E_WARNING:
-				return 'System Warning';
-
-			case E_PARSE:
-				return 'Parse Error';
-
-			case E_NOTICE:
-				return 'System Notice';
-
-			case E_CORE_ERROR:
-				return 'Core Error';
-
-			case E_CORE_WARNING:
-				return 'Core Warning';
-
-			case E_COMPILE_ERROR:
-				return 'Compile Error';
-
-			case E_COMPILE_WARNING:
-				return 'Compile Warning';
-
-			case E_USER_ERROR:
-				return 'User Error';
-
-			case E_USER_WARNING:
-				return 'User Warning';
-
-			case E_USER_NOTICE:
-				return 'User Notice';
-
-			case E_STRICT:
-				return 'Strict Warning';
-
-			case E_RECOVERABLE_ERROR:
-				return 'Recoverable Error';
-
-			case E_DEPRECATED:
-				return 'System Deprecated';
-
-			case E_USER_DEPRECATED:
-				return 'User Deprecated';
-
-			default:
-				return 'Unknown Error';
+			case E_ERROR:             return 'Fatal Error';
+			case E_WARNING:           return 'System Warning';
+			case E_PARSE:             return 'Parse Error';
+			case E_NOTICE:            return 'System Notice';
+			case E_CORE_ERROR:        return 'Core Error';
+			case E_CORE_WARNING:      return 'Core Warning';
+			case E_COMPILE_ERROR:     return 'Compile Error';
+			case E_COMPILE_WARNING:   return 'Compile Warning';
+			case E_USER_ERROR:        return 'User Error';
+			case E_USER_WARNING:      return 'User Warning';
+			case E_USER_NOTICE:       return 'User Notice';
+			case E_STRICT:            return 'Strict Warning';
+			case E_RECOVERABLE_ERROR: return 'Recoverable Error';
+			case E_DEPRECATED:        return 'System Deprecated';
+			case E_USER_DEPRECATED:   return 'User Deprecated';
+			default:                  return 'Unknown Error';
 		}
 	}
 
@@ -161,7 +129,7 @@ class cSystemMessage extends aBaseItem
 		}
 		
 		if( $this->trace !== null ) {
-			$formater->createToggleBlock( 'trace', $formater->formatTrace( $this->trace ), $baseClass === cOutputItemTemplate::C_DEBUG );
+			$formater->createToggleBlock( 'trace', $formater->formatTrace( $this->trace ), $baseClass === cOutputItemTemplate::C_NOTICE );
 		}
 
 		$tpl = new cOutputItemTemplate( $baseClass );
