@@ -3,18 +3,11 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="robots" content="noindex,noarchive">
-	<meta name="generator" content="LazyCMS">
+	
 	<title>Internal error</title>
 
 	<link href="<?php echo $this->resourcesPath; ?>debug.css" rel="stylesheet" type="text/css" />
 	<script src="<?php echo $this->resourcesPath; ?>debug.js" type="text/javascript"></script>
-
-	<style type="text/css">
-	/* <![CDATA[ */
-		
-
-	/* ]]> */
-	</style>
 </head>
 
 <body id="infoScreen">

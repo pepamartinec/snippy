@@ -1,6 +1,8 @@
 <?php
 namespace snippy\debug\screens;
 
+use snippy\debug\xInfoScreenException;
+
 use snippy\debug\cHTMLFormater;
 
 use snippy\debug\iInfoScreen;
@@ -52,10 +54,23 @@ abstract class aInfoScreen implements iInfoScreen
 	 * Saves infoScreen into file
 	 *
 	 * @param string $fileName
+	 *
+	 * @throws xInfoScreenException
 	 */
 	public function save( $fileName )
 	{
-		file_put_contents( $fileName, $this->render() );
+		$dirName = dirname( $fileName );
+		if( is_dir( $dirName ) === false ) {
+			if( mkdir( $dirName, 0777, true ) === false ) {
+				$error = error_get_last();
+				throw new xInfoScreenException( $error['message'] );
+			}
+		}
+		
+		if( file_put_contents( $fileName, $this->render() ) === false ) {
+			$error = error_get_last();
+			throw new xInfoScreenException( $error['message'] );
+		}
 	}
 	
 	/**
