@@ -7,7 +7,6 @@ use snippy\debug\cHTMLFormater;
 class cMessage extends aBaseItem
 {
 	const DEBUG = 'debug';
-	const INFO  = 'info';
 	const WARN  = 'warn';
 	const ERROR = 'error';
 

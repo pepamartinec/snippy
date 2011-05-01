@@ -82,7 +82,7 @@ class cSystemMessage extends aBaseItem
 
 			case E_NOTICE:
 			case E_USER_NOTICE:
-				return cOutputItemTemplate::C_INFO;
+				return cOutputItemTemplate::C_DEBUG;
 		}
 	}
 
@@ -161,7 +161,7 @@ class cSystemMessage extends aBaseItem
 		}
 		
 		if( $this->trace !== null ) {
-			$formater->createToggleBlock( 'trace', $formater->formatTrace( $this->trace ), $baseClass === cOutputItemTemplate::C_INFO );
+			$formater->createToggleBlock( 'trace', $formater->formatTrace( $this->trace ), $baseClass === cOutputItemTemplate::C_DEBUG );
 		}
 
 		$tpl = new cOutputItemTemplate( $baseClass );

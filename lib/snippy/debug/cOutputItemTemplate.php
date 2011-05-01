@@ -4,7 +4,6 @@ namespace snippy\debug;
 class cOutputItemTemplate
 {
 	const C_DEBUG = 'debug';
-	const C_INFO  = 'info';
 	const C_WARN  = 'warn';
 	const C_ERROR = 'error';
 
@@ -67,8 +66,7 @@ class cOutputItemTemplate
 	protected function getBaseIcon()
 	{
 		switch( $this->baseClass ) {
-			case self::C_DEBUG: return null;
-			case self::C_INFO:  return 'images/info.png';
+			case self::C_DEBUG: return 'images/info.png';
 			case self::C_WARN:  return 'images/warning.png';
 			case self::C_ERROR: return 'images/error.png';
 		}
@@ -82,17 +80,6 @@ class cOutputItemTemplate
 	public function setCustomClass( $class )
 	{
 		$this->customClass = $class;
-		return $this;
-	}
-
-	/**
-	 * Sets icon
-	 *
-	 * @param string|null $icon
-	 */
-	public function setIcon( $icon = null )
-	{
-		$this->icon = $icon;
 		return $this;
 	}
 
@@ -157,14 +144,7 @@ class cOutputItemTemplate
 		}
 
 		echo "<div class=\"{$class}\">";
-
-		if( $this->icon !== null ) {
-			echo "<img class=\"icon\" src=\"{$this->icon}\" />";
-		}
-
-		if( $this->title !== null ) {
-			echo "<span class=\"title\">{$this->title}</span>";
-		}
+		echo "<span class=\"title\">{$this->title}</span>";
 
 		$buttons = array();
 		$blocks  = array();

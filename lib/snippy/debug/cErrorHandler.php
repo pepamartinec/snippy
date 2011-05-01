@@ -186,6 +186,7 @@ namespace {
 		$top   = array_shift( $trace );
 
 		$item = new cTrace( $trace );
+		$item->setInvokePosition( $top['file'], $top['line'] );
 
 		cErrorHandler::write( $item );
 	}
