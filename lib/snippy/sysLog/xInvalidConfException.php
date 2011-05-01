@@ -1,4 +1,7 @@
 <?php
 namespace snippy\sysLog;
 
-class xInvalidConfException extends xLogFactoryException {}
+class xInvalidConfException extends xWriterConstructionException
+{
+
+}

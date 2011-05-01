@@ -1,6 +1,8 @@
 <?php
 namespace snippy\sysLog\writers;
 
+use snippy\sysLog\xInvalidConfException;
+
 use snippy\sysLog\xLogWriterException;
 
 /**
@@ -56,8 +58,9 @@ abstract class aPlainTextWriter extends aLogWriter
 	{
 		$this->basePlaceholders = $placeholders;
 
-		if( isset( $this->basePlaceholders['%%'] ) )
+		if( isset( $this->basePlaceholders['%%'] ) ) {
 			unset( $this->basePlaceholders['%%'] );
+		}
 	}
 
 	/**
@@ -74,7 +77,7 @@ abstract class aPlainTextWriter extends aLogWriter
 	 * @param string      $mask       log item mask
 	 * @param string|null $dateFormat format for date/time field
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xInvalidConfException
 	 */
 	public function setItemMask( $mask, $dateFormat = null )
 	{
@@ -84,7 +87,7 @@ abstract class aPlainTextWriter extends aLogWriter
 			
 		} else {
 			if( $dateFormat === null ) {
-				throw new xLogWriterException( "Missing dateFormat for item mask '{$mask}'" );
+				throw new xInvalidConfException( "Missing dateFormat for item mask '{$mask}'" );
 			}
 
 			$this->itemMaskDate = $dateFormat;
@@ -101,7 +104,7 @@ abstract class aPlainTextWriter extends aLogWriter
 	 * @return int             unique message ID
 	 *
 	 * @throws snippy\sysLog\xInvalidLogLevelException
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	public function log( $level, $message )
 	{
@@ -129,7 +132,7 @@ abstract class aPlainTextWriter extends aLogWriter
 	 *
 	 * @param string $item
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	protected abstract function write( $item );
 }

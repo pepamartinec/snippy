@@ -1,6 +1,8 @@
 <?php
 namespace snippy\sysLog;
 
+use snippy\sysLog\writers\cLazyConstructWriterProxy;
+
 use snippy\sysLog\writers\cBlackHoleWriter;
 use snippy\sysLog\writers\cFileWriter;
 
@@ -84,19 +86,19 @@ class cLogFactory
 	 *
 	 * @param array $conf
 	 *
-	 * @throws LogFactoryException
+	 * @throws snippy\sysLog\xLogFactoryException
 	 */
 	public static function init( array $conf )
 	{
 		if( self::$instance !== null ) {
 			throw new xLogFactoryException( 'cLogFactory has already been initialized' );
 		}
-//
-//		$conf['default'] = array(
-//			'writer'     => 'stream',
-//			'outputFile' => '%D-global.log',
-//			'outputFileDate' => 'Y-m-d'
-//		);
+
+		$conf['default'] = array(
+			'writer'         => 'stream',
+			'outputFile'     => 'log/%D-global.log',
+			'outputFileDate' => 'Y-m-d'
+		);
 
 		self::$instance = new self( $conf );
 	}
@@ -108,7 +110,7 @@ class cLogFactory
 	 * @return iLogWriter
 	 *
 	 * @throws snippy\sysLog\xLogFactoryException
-	 * @throws snippy\sysLog\xInvalidConfException
+	 * @throws snippy\sysLog\xWriterConstructionException
 	 */
 	public static function getLog( $moduleName )
 	{
@@ -117,32 +119,43 @@ class cLogFactory
 		}
 
 		if( isset( self::$instance->writers[ $moduleName ] ) === false ) {
-			self::$instance->createWriter( $moduleName );
+			// get module conf
+			$confName = $moduleName;
+			while( isset( $this->conf[ $confName ] ) === false &&
+				( $localNameLen = strrpos( $confName, '\\' ) ) !== false ) {
+	
+				$confName = substr( $confName, 0, $localNameLen );
+			}
+	
+			$conf = $this->conf[ $confName ] ?: $this->conf['default'];
+			
+			self::$instance->writers[ $moduleName ] = new cLazyConstructWriterProxy( $this, $moduleName, $conf );
 		}
 
 		return self::$instance->writers[ $moduleName ];
+	}
+	
+	/**
+	 * Replaces module logWriter with new one
+	 *
+	 * @param string     $moduleName
+	 * @param iLogWriter $writer
+	 */
+	public function setWriter( $moduleName, iLogWriter $writer )
+	{
+		$this->writers[ $moduleName ] = $writer;
 	}
 
 	/**
 	 * Returns log writer for given module
 	 *
 	 * @param string $moduleName
+	 * @param array  $conf
 	 *
-	 * @throws snippy\sysLog\xInvalidConfException
 	 * @throws snippy\sysLog\xWriterConstructionException
 	 */
-	protected function createWriter( $moduleName )
+	public function createWriter( $moduleName, array $conf )
 	{
-		// get module conf
-		$confName = $moduleName;
-		while( isset( $this->conf[ $confName ] ) === false &&
-			( $localNameLen = strrpos( $confName, '\\' ) ) !== false ) {
-
-			$confName = substr( $confName, 0, $localNameLen );
-		}
-
-		$conf = $this->conf[ $confName ] ?: $this->conf['default'];
-
 		// create writer
 		if( !isset( $conf['writer'] ) ) {
 			throw new xInvalidConfException( "'writer' configuration is missing for module '{$moduleName}'" );
@@ -162,7 +175,7 @@ class cLogFactory
 				throw new xInvalidConfException( "Invalid writer type '{$conf['writer']}'" );
 		}
 
-		$this->writers[ $moduleName ] = $writer;
+		return $writer;
 	}
 
 	/**
@@ -172,7 +185,6 @@ class cLogFactory
 	 * @param  array  $conf
 	 * @return Stream
 	 *
-	 * @throws snippy\sysLog\xInvalidConfException
 	 * @throws snippy\sysLog\xWriterConstructionException
 	 */
 	protected function createFileWriter( $moduleName, array $conf )
@@ -193,18 +205,12 @@ class cLogFactory
 			'%S' => $this->sessionID,
 			'%R' => $this->requestID,
 			'%D' => $outDate ? date( $outDate, $this->requestTime ) : null,
-			'%%' => '%'
 		);
 		$outFile = str_replace( array_keys( $outReplace ), $outReplace, $outFormat );
 
 		// create & setup writer
-		try {
-			$writer = new cFileWriter( $moduleName, $outFile );
-			$writer->setExternalPlaceholders( $outReplace );
-			
-		} catch( xLogWriterException $e ) {
-			throw new xWriterConstructionException( 'Unable to created requested writer', null, $e );
-		}
+		$writer = new cFileWriter( $moduleName, $outFile );
+		$writer->setExternalPlaceholders( $outReplace );
 
 		if( isset( $conf['itemMask'] ) ) {
 			$writer->setItemMask( $conf['itemMask'], $conf['itemMaskDate'] ?: null );

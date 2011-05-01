@@ -94,7 +94,7 @@ abstract class aLogWriter implements iLogWriter
 	 *
 	 * @param string $message
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	public function debug( $message )
 	{
@@ -110,7 +110,7 @@ abstract class aLogWriter implements iLogWriter
 	 *
 	 * @param string $message
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	public function warn( $message )
 	{
@@ -126,7 +126,7 @@ abstract class aLogWriter implements iLogWriter
 	 *
 	 * @param string $message
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	public function error( $message )
 	{

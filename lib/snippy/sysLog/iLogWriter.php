@@ -15,7 +15,7 @@ interface iLogWriter
 	 *
 	 * @param int $logLevel
 	 *
-	 * @throws InvalidLogLevelException
+	 * @throws snippy\sysLog\xInvalidLogLevelException
 	 */
 	public function setLogLevel( $logLevel );
 
@@ -32,7 +32,7 @@ interface iLogWriter
 	 * @param  string   $message message content
 	 * @return int|null          unique message ID
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	public function debug( $message );
 
@@ -42,7 +42,7 @@ interface iLogWriter
 	 * @param  string   $message message content
 	 * @return int|null          unique message ID
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	public function warn( $message );
 
@@ -52,7 +52,7 @@ interface iLogWriter
 	 * @param  string   $message message content
 	 * @return int|null          unique message ID
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	public function error( $message );
 
@@ -64,7 +64,7 @@ interface iLogWriter
 	 * @return int|null          unique message ID
 	 *
 	 * @throws snippy\sysLog\xInvalidLogLevelException
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	public function log( $level, $message );
 }

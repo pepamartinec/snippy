@@ -1,6 +1,8 @@
 <?php
 namespace snippy\sysLog\writers;
 
+use snippy\sysLog\xWriteException;
+use snippy\sysLog\xWriterConstructionException;
 use snippy\sysLog\xLogWriterException;
 
 /**
@@ -22,7 +24,7 @@ class cFileWriter extends aPlainTextWriter
 	 *
 	 * @param string $outputFile
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriterConstructionException
 	 */
 	public function __construct( $moduleName, $outputFile )
 	{
@@ -33,7 +35,7 @@ class cFileWriter extends aPlainTextWriter
 		// create output dir
 		$dirname = dirname( $outputFile );
 		if( is_dir( $dirname ) === false && mkdir( $dirname, 0777, true ) === false ) {
-			throw new xLogWriterException( error_get_last() );
+			throw new xWriterConstructionException( error_get_last() );
 		}
 	}
 
@@ -42,26 +44,26 @@ class cFileWriter extends aPlainTextWriter
 	 *
 	 * @param string $item
 	 *
-	 * @throws snippy\sysLog\xLogWriterException
+	 * @throws snippy\sysLog\xWriteException
 	 */
 	protected function write( $item )
 	{
 		// open log-file
 		if( ( $out = fopen( $this->outputFile, 'a' ) ) === false ) {
 			$error = error_get_last();
-			throw new xLogWriterException( $error['message'] );
+			throw new xWriteException( $error['message'] );
 		}
 
 		// write message
 		if( fwrite( $out, $item . PHP_EOL ) === false ) {
 			$error = error_get_last();
-			throw new xLogWriterException( $error['message'] );
+			throw new xWriteException( $error['message'] );
 		}
 
 		// close log-file
 		if( fclose( $out ) === false ) {
 			$error = error_get_last();
-			throw new xLogWriterException( $error['message'] );
+			throw new xWriteException( $error['message'] );
 		}
 	}
 }
