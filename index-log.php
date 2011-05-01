@@ -3,27 +3,22 @@
 <head>
 	<meta charset="UTF-8">
 	<title>LazyLog2</title>
-	<link href="lib/snippy/debug/resources/debug.css" rel="stylesheet" type="text/css" />
-	<script type="text/javascript" src="lib/snippy/debug/resources/debug.js"></script>
+	<link href="styles/debug.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <?php
+use snippy\sysLog\cLogFactory;
 
 ob_start();
 
-use snippy\debug\outputWriters\cExceptionScreenWriter;
-use snippy\debug\outputWriters\cBlackHoleWriter;
-use snippy\debug\outputItems\cException;
+include_once 'common.php';
+
+
+
 use snippy\debug\cHTMLFormater;
+use snippy\debug\outputWriters\cExceptionScreenWriter;
 use snippy\debug\outputWriters\cInPageWriter;
 use snippy\debug\cErrorHandler;
-use snippy\debug\screens\cInfoScreen;
-use snippy\debug\screens\cExceptionScreen;
-
-define( 'DEBUG', true );
-define( 'ERROR_LEVEL', -1 );
-
-include_once 'common.php';
 
 $formater = new cHTMLFormater();
 cErrorHandler::init( array(
@@ -32,32 +27,6 @@ cErrorHandler::init( array(
 
 	'exceptionWriter' => new cExceptionScreenWriter( $formater ),
 ) );
-
-
-
-
-$c = $d + 7;
-
-function a( $aa )
-{
-	$formater = new cHTMLFormater();
-
-	$bs = new cInfoScreen( $formater );
-	b($formater, $bs);
-}
-
-function b( $x, cInfoScreen $y )
-{
-	trace();
-	//throw new Exception('Let me say you something \'Hello\' :)');
-	fap();
-	//$y->display();
-}
-
-session_start();
-
-a( array( 1 => 5, 7 => array( 5,3,4 ) ) );
-
 
 
 $conf = array(
@@ -85,13 +54,22 @@ $conf = array(
 	),
 );
 
-dump($conf);
+cLogFactory::init( $conf );
 
+$log = cLogFactory::getLog( 'snippy\sysLog' );
+$log->error( 'Ouch!!!!' );
+$log->error( 'More Ouch!!!!' );
+$log->debug( 'Good :)' );
 
-info( 'Yes, we are here!!!' );
+$log = cLogFactory::getLog( 'LH\Util' );
+$log->error( 'Ouch!!!!' );
+$log->error( 'More Ouch!!!!' );
+$log->debug( 'Good :)' );
 
-$c = $x / 0;
-lam();
+$log = cLogFactory::getLog( 'LH' );
+$log->error( 'Ouch!!!!' );
+$log->error( 'More Ouch!!!!' );
+$log->debug( 'Good :)' );
 
 ob_end_flush();
 
