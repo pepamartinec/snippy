@@ -4,13 +4,13 @@ namespace snippy\sysLog\writers;
 use snippy\sysLog\iLogWriter;
 
 /**
- * cBlackHole log writer
+ * cBlackHoleWriter log writer
  *
  * Any log writen trouhg this writer is immediately thrown away
  *
  * @author Josef Martinec
  */
-class cBlackHole extends aLogWriter
+class cBlackHoleWriter extends aLogWriter
 {
 	/**
 	 * Constructor

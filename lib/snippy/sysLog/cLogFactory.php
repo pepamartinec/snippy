@@ -1,8 +1,8 @@
 <?php
 namespace snippy\sysLog;
 
+use snippy\sysLog\writers\cBlackHoleWriter;
 use snippy\sysLog\writers\cFileWriter;
-use snippy\sysLog\writers\cBlackHole;
 
 /**
  * Log factory
@@ -219,7 +219,7 @@ class cLogFactory
 	 * Internaly, just one writer instance is created, because
 	 * it can be safely shared between all clients
 	 *
-	 * @return cBlackHole
+	 * @return cBlackHoleWriter
 	 */
 	protected function createBlackHoleWriter()
 	{
@@ -227,7 +227,7 @@ class cLogFactory
 		static $writer = null;
 		
 		if( $writer === null ) {
-			$writer = new cBlackHole();
+			$writer = new cBlackHoleWriter();
 		}
 
 		return $writer;
