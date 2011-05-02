@@ -29,6 +29,11 @@ class cHTMLFormater
 	 * @var iIdeUrlGenerator
 	 */
 	protected $ideUrlGenerator;
+	
+	/**
+	 * @var string
+	 */
+	protected $recursionMarker;
 
 	/**
 	 * Constructor
@@ -41,6 +46,7 @@ class cHTMLFormater
 		$this->dumpMaxDepth    = 5;
 		$this->dumpMaxLength   = 10;
 		$this->ideUrlGenerator = $urlGenerator;
+		$this->recursionMarker = uniqid( "\x00" );
 	}
 
 	/**
@@ -90,8 +96,9 @@ class cHTMLFormater
 					$params = $refl->getParameters();
 					$args = array();
 
-					foreach( $item['args'] as $m => $arg )
+					foreach( $item['args'] as $m => $arg ) {
 						$args[ $params[$m]->name ] = $arg;
+					}
 
 				} catch( \ReflectionException $e ) {
 					$args = $item['args'];
@@ -126,8 +133,9 @@ class cHTMLFormater
 			$spans = array();
 			foreach( $lines as $n => &$line ) {
 				// prepend prev line opened spans
-				if( sizeof( $spans ) > 0 )
-				$line = implode( '', $spans ).$line;
+				if( sizeof( $spans ) > 0 ) {
+					$line = implode( '', $spans ).$line;
+				}
 
 				// count spans
 				$spans = array();
@@ -136,15 +144,17 @@ class cHTMLFormater
 				if( $out[0] !== null ) {
 					// save opened spans
 					foreach( $out[0] as $span ) {
-						if( substr( $span, 0, 2 ) !== '</' )
-						array_push( $spans, $span );
-						else
-						array_pop( $spans );
+						if( substr( $span, 0, 2 ) !== '</' ) {
+							array_push( $spans, $span );
+						} else {
+							array_pop( $spans );
+						}
 					}
 
 					// close opened spans
-					if( sizeof( $spans ) > 0 )
-					$line .= str_repeat( '</span>', sizeof( $spans ) );
+					if( sizeof( $spans ) > 0 ) {
+						$line .= str_repeat( '</span>', sizeof( $spans ) );
+					}
 				}
 			}
 
@@ -160,8 +170,9 @@ class cHTMLFormater
 		$code = '<pre class="sourceCode">';
 		$lineDigits = strlen( (string)( $start + $length ) );
 
-		for( $n = $start; $n < $end; ++$n )
+		for( $n = $start; $n < $end; ++$n ) {
 			$code .= sprintf("<div class=\"line%s\"><span class=\"lineNumber\">%-{$lineDigits}d: </span>%s</div>", $n == $lineNo ? ' selected' : '', $n, $source[ $n ] );
+		}
 
 		return $code.'</pre>';
 	}
@@ -174,23 +185,18 @@ class cHTMLFormater
 	 */
 	public function formatVariable( $var, $displayType = true )
 	{
-		$stack = array();
-
 		return '<div class="varDump">'.
-		           $this->formatVariableHepler( $var, $displayType, $stack ).
+		           $this->formatVariableHepler( $var, $displayType, 0 ).
 		       '</div>';
 	}
 
-	private function formatVariableHepler( $var, $displayType, &$stack )
+	private function formatVariableHepler( $var, $displayType, $depth )
 	{
-		// cyclic reference setection
-		if( in_array( $var, $stack, true ) )
-			return '<span class="cyclicRef">** Cyclic reference detected ('.get_class($var).') **</span>';
-
 		// object/array dump depth limitation
-		if( sizeof( $stack ) > $this->dumpMaxDepth )
+		if( $depth > $this->dumpMaxDepth ) {
 			return "<span class=\"maxDepth\">** Max nesting depth ({$this->dumpMaxDepth}) reached **</span>";
-
+		}
+		
 
 		ob_start();
 
@@ -225,77 +231,95 @@ class cHTMLFormater
 
 		// ===== ARRAY =====
 		} elseif( is_array( $var ) ) {
-			echo 'array('.sizeof( $var ).') [';
-
-			if( sizeof( $var ) === 0 ) {
-				echo ']';
-
+			if( isset( $var[ $this->recursionMarker ] ) ) {
+				echo '<span class="cyclicRef">** Circular reference detected (array) **</span>';
+				
 			} else {
-				ob_start();
-				array_push( $stack, $var );
-				$itemsCounter = 0;
-				foreach( $var as $k => $v ) {
-					echo '<br />';
-
-					if( ++$itemsCounter > $this->dumpMaxLength ) {
-						$hiddenItemsNo = sizeof( $var ) - $itemsCounter;
-						echo "<span class=\"maxLength\">** ... and {$hiddenItemsNo} more items **</span>";
-						break;
+				echo 'array('.sizeof( $var ).') [';
+	
+				if( sizeof( $var ) === 0 ) {
+					echo ']';
+	
+				} else {
+					$var[ $this->recursionMarker ] = true;
+					$itemsCounter = 0;
+					
+					ob_start();
+									
+					foreach( $var as $k => $v ) {
+						if( $k === $this->recursionMarker ) {
+							continue;
+						}
+						
+						echo '<br />';
+	
+						if( ++$itemsCounter > $this->dumpMaxLength ) {
+							$hiddenItemsNo = sizeof( $var ) - $itemsCounter;
+							echo "<span class=\"maxLength\">** ... and {$hiddenItemsNo} more items **</span>";
+							break;
+						}
+	
+						echo '<span class="key">'.( is_string($k) ? "'$k'" : $k ).'</span>';
+						echo '&nbsp;=>&nbsp';
+	
+						// GLOBALS cyclic reference workaround
+						if( $k === 'GLOBALS' && is_array( $v ) && array_key_exists( 'GLOBALS', $v ) ) {
+							echo '<span class="cyclicRef">** Circular reference detected (GLOBALS) **</span>';
+						} else {
+							echo $this->formatVariableHepler( $v, $displayType, $depth + 1 );
+						}
 					}
-
-					echo '<span class="key">'.( is_string($k) ? "'$k'" : $k ).'</span>';
-					echo '&nbsp;=>&nbsp';
-
-					// GLOBALS cyclic reference workaround
-					if( $k === 'GLOBALS' && is_array( $v ) && array_key_exists( 'GLOBALS', $v ) )
-						echo '<span class="cyclicRef">** Cyclic reference detected (GLOBALS) **</span>';
-					elseif( in_array( $v, $stack, true ) )
-						echo '<span class="cyclicRef">** Cyclic reference detected ('.$v.') **</span>';
-					else
-						echo $this->formatVariableHepler( $v, $displayType, $stack );
+	
+					echo $this->indentBlock( ob_get_clean(), 1 );
+					echo '<br />]';
+					
+					unset( $var[ $this->recursionMarker ] );
 				}
-				array_pop( $stack );
-
-				echo $this->indentBlock( ob_get_clean(), 1 );
-				echo '<br />]';
 			}
 
 		// ===== OBJECT =====
 		} elseif( is_object( $var ) ) {
-
-			$refl = new \ReflectionObject( $var );
-			echo '<span class="name">'.$refl->getName().'</span>&nbsp;{';
-
-			$properties = $refl->getProperties();
-			if( sizeof( $properties ) == 0 ) {
-				echo '}';
-
+			if( isset( $var->{$this->recursionMarker} ) ) {
+				echo '<span class="cyclicRef">** Circular reference detected ('.get_class( $var ).') **</span>';
+				
 			} else {
-				ob_start();
-				array_push( $stack, $var );
-				$itemsCounter = 0;
-				foreach( $refl->getProperties() as $prop ) {
-					echo '<br />';
-
-					if( ++$itemsCounter > $this->dumpMaxLength ) {
-						$hiddenItemsNo = sizeof( $properties ) - $itemsCounter;
-						echo "<span class=\"maxLength\">** ... and {$hiddenItemsNo} more items **</span>";
-						break;
+				$refl = new \ReflectionObject( $var );
+				echo '<span class="name">'.$refl->getName().'</span>&nbsp;{';
+	
+				$properties = $refl->getProperties();
+				if( sizeof( $properties ) == 0 ) {
+					echo '}';
+	
+				} else {
+					$var->{$this->recursionMarker} = true;
+					$itemsCounter = 0;
+					
+					ob_start();
+					
+					foreach( $refl->getProperties() as $prop ) {
+						echo '<br />';
+	
+						if( ++$itemsCounter > $this->dumpMaxLength ) {
+							$hiddenItemsNo = sizeof( $properties ) - $itemsCounter;
+							echo "<span class=\"maxLength\">** ... and {$hiddenItemsNo} more items **</span>";
+							break;
+						}
+	
+						echo '<span class="modifiers">'.
+								( $prop->isStatic() ? '*' : '' ).
+								( $prop->isPublic() ? 'pub' : ( $prop->isProtected() ? 'pro' : 'pri' ) ).
+						     '</span>&nbsp;<span class="key">'.$prop->getName().'</span>&nbsp;=&gt;&nbsp;';
+	
+						$prop->setAccessible( true );
+						echo $this->formatVariableHepler( $prop->getValue( $var ), $displayType, $depth + 1 );
+						$prop->setAccessible( !( $prop->isProtected() || $prop->isPrivate() ) );
 					}
-
-					echo '<span class="modifiers">'.
-							( $prop->isStatic() ? '*' : '' ).
-							( $prop->isPublic() ? 'pub' : ( $prop->isProtected() ? 'pro' : 'pri' ) ).
-					     '</span>&nbsp;<span class="key">'.$prop->getName().'</span>&nbsp;=&gt;&nbsp;';
-
-					$prop->setAccessible( true );
-					echo $this->formatVariableHepler( $prop->getValue( $var ), $displayType, $stack );
-					$prop->setAccessible( !( $prop->isProtected() || $prop->isPrivate() ) );
+	
+					echo $this->indentBlock( ob_get_clean(), 1 );
+					echo '<br />}';
+					
+					unset( $var->{$this->recursionMarker} );
 				}
-				array_pop( $stack );
-
-				echo $this->indentBlock( ob_get_clean(), 1 );
-				echo '<br />}';
 			}
 
 		// ===== RESOURCE =====
@@ -315,8 +339,9 @@ class cHTMLFormater
 	 */
 	public function formatListVertical( array $varList )
 	{
-		if( sizeof( $varList ) == 0 )
+		if( sizeof( $varList ) == 0 ) {
 			return '<div class="list empty">empty</div>';
+		}
 
 		ob_start();
 
@@ -340,8 +365,9 @@ class cHTMLFormater
 	 */
 	public function formatListHorizontal( $items )
 	{
-		if( sizeof( $items ) == 0 )
+		if( sizeof( $items ) == 0 ) {
 			return '<div class="list empty">empty</div>';
+		}
 
 		ob_start();
 
@@ -349,14 +375,16 @@ class cHTMLFormater
 
 		// print header (array keys)
 		echo '<tr>';
-		foreach( $items as $key => $item )
+		foreach( $items as $key => $item ) {
 			echo '<th>'.$key.'</th>';
+		}
 		echo '</tr>';
 
 		// print content
 		echo '<tr>';
-		foreach( $items as $key => $item )
+		foreach( $items as $key => $item ) {
 			echo '<td>'.$this->formatVariable( $item ).'</td>';
+		}
 		echo '</tr>';
 
 		echo '</table>';
