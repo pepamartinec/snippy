@@ -58,6 +58,12 @@ class cHTMLFormater
 	public function formatTrace( array $trace )
 	{
 		$trace = array_reverse( $trace );
+		array_unshift( $trace, array(
+			'function' => '{main}',
+			'file'     => isset( $trace[0]['file'] ) ? $trace[0]['file'] : null,
+			'line'     => isset( $trace[0]['line'] ) ? $trace[0]['line'] : null,
+			'args'     => null
+		));
 
 		ob_start();
 
@@ -69,45 +75,60 @@ class cHTMLFormater
 			echo '<th class="buttons"></th>';
 		echo '</tr>';
 
-		echo '<tr class="title">';
-			echo '<td>0</td>';
-			echo '<td>{main}()</td>';
-			echo '<td>'.$this->formatFileName( $trace[0]['file'], $trace[0]['line'] ).'</td>';
-			echo '<td></td>';
-		echo '</tr>';
-
 		foreach( $trace as $n => $item ) {
-			$argsID = $this->getNextBlockID();
-			$codeID = $this->getNextBlockID();
+			$itemInfo = array();
+			
+			// arguments
+			try {
+				$refl = array_key_exists( 'class', $item ) ?
+					new \ReflectionMethod( $item['class'], $item['function'] ) :
+					new \ReflectionFunction( $item['function'] );
 
+				$params = $refl->getParameters();
+				$argsList = array();
+
+				foreach( $item['args'] as $m => $arg ) {
+					$argsList[ $params[$m]->name ] = $arg;
+				}
+
+			} catch( \ReflectionException $e ) {
+				$argsList = $item['args'];
+			}
+			
+			$id = $this->getNextBlockID();
+			$itemInfo[] = array(
+				'button' => $this->getToggleButton( 'args', $id ),
+				'block'  => "<tr class=\"arguments collapsed\" id=\"{$id}\"><td colspan=\"4\">{$this->formatListHorizontal( $argsList )}</td></tr>"
+			);
+			
+			// source code
+			$fileName = isset( $trace[0]['file'] ) ? $trace[0]['file'] : null;
+			$fileLine = isset( $trace[0]['line'] ) ? $trace[0]['line'] : null;
+			
+			if( $fileName !== null ) {
+				$id = $this->getNextBlockID();
+				$itemInfo[] = array(
+					'button' => $this->getToggleButton( 'source', $id ),
+					'block'  => "<tr class=\"code collapsed\" id=\"{$id}\"><td colspan=\"4\">{$this->formatSourceCode( $fileName, $fileLine )}</td></tr>"
+				);
+			}
+			
+			// trace item
 			echo '<tr class="title">';
 				echo '<td>'.( $n+1 ).'</td>';
 				echo '<td>'.( isset( $item['class'] ) ? $item['class'].$item['type'] : '' ).$item['function'].'()</td>';
-				echo '<td>'.$this->formatFileName( $item['file'], $item['line'] ).'</td>';
-				echo '<td>'.$this->getToggleButton( 'args', $argsID ).'&nbsp;|&nbsp;'.$this->getToggleButton( 'source', $codeID ).'</td>';
+				echo '<td>'.$this->formatFileName( $fileName, $fileLine ).'</td>';
+				echo '<td>';
+					foreach( $itemInfo as $infoItem ) {
+						echo $infoItem['button'].' ';
+					}
+				echo '</td>';
 			echo '</tr>';
 
-			echo "<tr class=\"arguments collapsed\" id=\"{$argsID}\"><td colspan=\"4\">";
-				try {
-					$refl = array_key_exists( 'class', $item ) ?
-						new \ReflectionMethod( $item['class'], $item['function'] ) :
-						new \ReflectionFunction( $item['function'] );
+			foreach( $itemInfo as $infoItem ) {
+				echo $infoItem['block'];
+			}
 
-					$params = $refl->getParameters();
-					$args = array();
-
-					foreach( $item['args'] as $m => $arg ) {
-						$args[ $params[$m]->name ] = $arg;
-					}
-
-				} catch( \ReflectionException $e ) {
-					$args = $item['args'];
-				}
-
-				echo $this->formatListHorizontal( $args );
-			echo '</td></tr>';
-
-			echo "<tr class=\"code collapsed\" id=\"{$codeID}\"><td colspan=\"4\">".$this->formatSourceCode( $item['file'], $item['line'] )."</td></tr>";
 		}
 		echo '</table>';
 
@@ -167,14 +188,14 @@ class cHTMLFormater
 		$length = 20;
 		$end    = min( $start + $length, sizeof( $source ) );
 
-		$code = '<pre class="sourceCode">';
 		$lineDigits = strlen( (string)( $start + $length ) );
 
+		$code = '';
 		for( $n = $start; $n < $end; ++$n ) {
 			$code .= sprintf("<div class=\"line%s\"><span class=\"lineNumber\">%-{$lineDigits}d: </span>%s</div>", $n == $lineNo ? ' selected' : '', $n, $source[ $n ] );
 		}
-
-		return $code.'</pre>';
+		
+		return "<div class=\"sourceCode\">{$this->formatFileName( $file, $lineNo )}<pre>{$code}</pre></div>";
 	}
 
 	/**
@@ -401,6 +422,10 @@ class cHTMLFormater
 	 */
 	public function formatFileName( $fileName, $line = null, $clickable = true )
 	{
+		if( $fileName == '' ) {
+			return '';
+		}
+		
 		// get file realPath
 		$fileName = $this->intersectFilenames( $_SERVER['DOCUMENT_ROOT'].'/', $fileName );
 
@@ -442,7 +467,7 @@ class cHTMLFormater
 		$class = $collapsed ? 'collapsed' : '';
 
 		return array(
-			'button' => "<span class=\"button\" onclick=\"var el=document.getElementById('{$id}');if( el.className.match(/\bcollapsed\b/) == null ) el.className += ' collapsed'; else el.className = el.className.replace(/\bcollapsed\b/, ' ');\">{$btnLabel}</span>",
+			'button' => $this->getToggleButton( $btnLabel, $id ),
 			'block'  => "<div id=\"{$id}\" class=\"{$class}\">{$content}</div>"
 		);
 	}
@@ -475,7 +500,7 @@ class cHTMLFormater
 	/**
 	 * Calculates relative path from one file to another
 	 *
-	 * @param string $baseFilename referenced file name
+	 * @param string $baseFilename    referenced file name
 	 * @param string $relatedFilename referencing file name
 	 * @return string
 	 */

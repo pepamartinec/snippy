@@ -20,7 +20,8 @@
 
 .fileNameBlock .fileName { font-weight: bold; }
 .fileNameBlock .fileLine { font-weight: bold; }
-
+.fileNameBlock > a { color: inherit; text-decoration: none; }
+.fileNameBlock > a:hover { text-decoration: underline; }
 
 
 
@@ -36,11 +37,13 @@
 .list td { border: 1px solid #D8D826; padding: 5px 15px; }
 .list.horizontal > tbody > tr > td { text-align: center; vertical-align: top; }
 
-.sourceCode { background-color: #ffc; border: 1px solid #D8D826; padding: 5px; margin: 0px 10px 0px 15px; overflow: hidden; }
-.sourceCode > .line > .lineNumber { color: #000; font-style: italic; }
-.sourceCode > .line.selected { background-color: #fbb; }
+.sourceCode { background-color: #ffc; border: 1px solid #D8D826; overflow: hidden; padding: 5px; }
+.sourceCode > pre { margin : 0px; }
+.sourceCode > .fileNameBlock { float: right; }
+.sourceCode > pre > .line > .lineNumber { color: #000; font-style: italic; }
+.sourceCode > pre > .line.selected { background-color: #fbb; }
 
-.varDump { font-family: monospace; font-size: 12px; }
+.varDump { font-family: monospace; font-size: 12px; white-space: nowrap; }
 .varDump .empty { color: #00b; }
 .varDump .key { color: #141; }
 .varDump .modifiers { font-style: italic; }
@@ -48,7 +51,7 @@
 .varDump .null,
 .varDump .bool { color: #00b; }
 .varDump .integer,
-.varDump .float { color: #950; }
+.varDump .float { color: #080; }
 .varDump .string { color: #d00; }
 
 .varDump .varType { color: #000; font-size: 75%; padding-right: 3px; }
@@ -57,10 +60,10 @@
 
 
 
-#infoScreen { margin: 0; padding: 0; }
+#infoScreen { margin: 0; padding: 0; font-family: Arial, sans-serif; font-size: 12px; }
 #infoScreen > fieldset { border: none; border-top: 2px solid #000; margin-top: 10px; }
 #infoScreen > fieldset > legend { font-size: 160%; font-weight: bold; padding: 0px 7px; border-width: 0px 2px; }
 #infoScreen div.block { background-color: #eee; border: 1px solid #999; padding: 5px 10px; margin-bottom: 15px; }
 
 #infoScreen #exception { margin: 0px; padding: 10px 20px; background-color: #f00; color: #fff; font-size: 130%; font-weight: bold; }
-#infoScreen #source { margin: 10px 0px; }
+#infoScreen #source { margin: 10px; }
