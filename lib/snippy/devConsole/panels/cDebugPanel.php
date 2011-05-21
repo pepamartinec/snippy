@@ -1,6 +1,9 @@
 <?php
 namespace snippy\devConsole\panels;
 
+use snippy\debug\cHTMLFormater;
+use snippy\debug\iOutputItem;
+
 use snippy\debug\iOutputWriter;
 use snippy\devConsole\iDevConsolePanel;
 
@@ -28,7 +31,7 @@ class cDebugPanel implements iDevConsolePanel, iOutputWriter
 	 *
 	 * @param string $title
 	 */
-	public function __construct( HTMLFormater $formater )
+	public function __construct( cHTMLFormater $formater )
 	{
 		$this->items    = array();
 		$this->formater = $formater;
@@ -59,8 +62,9 @@ class cDebugPanel implements iDevConsolePanel, iOutputWriter
 	{
 		ob_start();
 
-		foreach( $this->items as $item )
+		foreach( $this->items as $item ) {
 			echo $item->render( $this->formater );
+		}
 
 		return ob_get_clean();
 	}

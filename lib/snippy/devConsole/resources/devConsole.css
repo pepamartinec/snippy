@@ -1,0 +1,39 @@
+@CHARSET "UTF-8";
+
+#devConsole {
+	position: fixed;
+	bottom: 0px;
+	right: 0px;
+	font-size : 10px;
+}
+ 
+#devConsole .ui-tabs-panel {
+	height : 100%;
+	margin-bottom : 20px;
+	overflow: auto;
+}
+
+#devConsole .ui-tabs-nav {
+	position: absolute !important;
+	left: 0;
+	bottom: 0;
+	right:0;
+	padding: 0 0.2em 0.2em 0;
+	height : 20px;
+}
+
+#devConsole .ui-tabs-nav li {
+	float : right;
+	margin-top: -2px !important;
+	margin-bottom: 1px !important;
+	border-top: none;
+	border-bottom-width: 1px;
+}
+
+#devConsole .ui-tabs-nav li a {
+	padding: 3px 6px;
+}
+
+.ui-tabs-selected {
+	margin-top: -3px !important;
+}

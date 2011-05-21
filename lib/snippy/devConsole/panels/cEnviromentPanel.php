@@ -1,10 +1,16 @@
 <?php
 namespace snippy\devConsole\panels;
 
+use snippy\debug\cHTMLFormater;
 use snippy\devConsole\iDevConsolePanel;
 
 class cEnviromentPanel implements iDevConsolePanel
 {
+	/**
+	 * @var snippy\debug\cHTMLFormater
+	 */
+	protected $formater;
+	
 	/**
 	 * @var array
 	 */
@@ -15,11 +21,11 @@ class cEnviromentPanel implements iDevConsolePanel
 	 *
 	 * @param cLogBar|null $logBar
 	 */
-	public function __construct()
+	public function __construct( cHTMLFormater $formater )
 	{
-		$constants = get_defined_constants( true );
+		$this->formater = $formater;
 
-		$this->data['$_SESSION'] = $_SESSION;
+		$this->data['$_SESSION'] = isset( $_SESSION ) ? $_SESSION : null;
 		$this->data['$_SERVER']  = $_SERVER;
 		$this->data['$_POST']    = $_POST;
 		$this->data['$_GET']     = $_GET;
@@ -47,6 +53,8 @@ class cEnviromentPanel implements iDevConsolePanel
 	 */
 	public function render()
 	{
+		ob_start();
+		
 		$requestHeaders = array();
 		foreach( $this->data['$_SERVER'] as $k => $v ) {
 			if( substr( $k, 0, 5 ) != 'HTTP_' )
@@ -67,7 +75,7 @@ class cEnviromentPanel implements iDevConsolePanel
 
 
 
-		$columnStyle = 'vertical-align: top; padding: 3px 7px; '.iLogAsHTML::COLOR_GRAY;
+		$columnStyle = 'vertical-align: top; padding: 3px 7px; ';
 
 		echo "<fieldset><legend>Request</legend>";
 		$this->printVars( array(
@@ -91,20 +99,26 @@ class cEnviromentPanel implements iDevConsolePanel
 			'Settings'  => $settings
 		));
 		echo '</fieldset>';
+	
+		return ob_get_clean();
 	}
 
 	protected function printVars( $data )
 	{
 		echo '<table><tr>';
-		foreach( $data as $title => $values  )
-			if( $values !== null )
+		foreach( $data as $title => $values  ) {
+			if( $values !== null ) {
 				echo "<th>{$title}</th>";
+			}
+		}
 
 		echo '</tr><tr>';
 
-		foreach( $data as $title => $values  )
-			if( $values !== null )
-				echo '<td>'.cLogWriterHTML::listVertical( $values ).'</td>';
+		foreach( $data as $title => $values  ) {
+			if( $values !== null ) {
+				echo '<td>'.$this->formater->formatListVertical( $values ).'</td>';
+			}
+		}
 
 		echo '</tr></table>';
 	}

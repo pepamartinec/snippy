@@ -48,7 +48,7 @@ class cDevConsole
 	{
 		if( self::$instance === null ) {
 			self::$instance = new self();
-
+			
 			// restore any non-rendered bar
 		}
 
@@ -99,25 +99,25 @@ class cDevConsole
 		$time = number_format( ( microtime( true ) - $this->startTime ) * 1000, 1, '.', ' ' );
 		$mem  = number_format( memory_get_peak_usage( true ) / 1000, 1, '.', ' ' );
 		$date = date_format( new \DateTime( 't'.date('H.i.s.', $this->startTime) ), 'H:i:s.u' );
-
-		echo '<link rel="stylesheet" type="text/css" href="'.self::STYLESHEET.'" />';
-
+		
 		echo "<div id=\"{$elementID}\">";
-
+		
+			echo '<ul>';
 			foreach( $this->panels as $panel ) {
-				echo "<div class=\"panel\" id=\"{$elementID}_{$panel->getID()}\"><h2>{$panel->getTitle()}</h2>";
-				echo $panel->render();
-				echo '</div>';
+				echo "<li><a href=\"#{$elementID}_{$panel->getID()}\">{$panel->getTitle()}</a></li>";
+			}
+			echo '</ul>';
+		
+			foreach( $this->panels as $panel ) {
+				echo "<div id=\"{$elementID}_{$panel->getID()}\">{$panel->render()}</div>";
 			}
 
-			echo "<div class=\"header\">";
-			echo "<h2>LazyBar</h2><img src=\"".self::IMG_DATE."\" /> {$date} <img src=\"".self::IMG_TIME."\" /> {$time}ms <img src=\"".self::IMG_MEM."\" /> {$mem}kB";
-			echo "</div>";
+//
+//			echo "<div class=\"header\">";
+//			echo "<h2>LazyBar</h2><img src=\"".self::IMG_DATE."\" /> {$date} <img src=\"".self::IMG_TIME."\" /> {$time}ms <img src=\"".self::IMG_MEM."\" /> {$mem}kB";
+//			echo "</div>";
 
 		echo "</div>";
-
-		echo '<script type="text/javascript" src="'.self::JAVASCRIPT.'"></script>';
-		echo '<script type="text/javascript">new LogBar( "lazyBar" ); document.id("'.$elementID.'").setStyle("display","block");</script>';
 	}
 
 }
