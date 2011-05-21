@@ -14,10 +14,6 @@ namespace snippy\debug {
 	use snippy\debug\screens\cExceptionScreen;
 	use snippy\debug\outputItems\cMessage;
 
-	if( defined( 'DEBUG' ) !== true ) {
-		define( 'DEBUG', false );
-	}
-
 	if( defined( 'ERROR_LEVEL' ) !== true ) {
 		define( 'ERROR_LEVEL', E_ALL );
 	}
