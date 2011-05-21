@@ -44,7 +44,7 @@ $c = $d + 7;
 
 function a( $aa )
 {
-	include 'invalidInclude.php';
+//	include 'invalidInclude.php';
 	
 	$formater = new cHTMLFormater( new cEclipseGenerator( 'localhost:34567' ) );
 
@@ -55,7 +55,7 @@ function a( $aa )
 function b( $x, cInfoScreen $y )
 {
 	trace();
-	throw new Exception('Let me say you something \'Hello\' :)');
+//	throw new Exception('Let me say you something \'Hello\' :)');
 	
 	//$y->display();
 }
