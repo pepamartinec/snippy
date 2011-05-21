@@ -3,7 +3,8 @@
 .button:hover { text-decoration: underline; }
 
 .collapsed { display: none; }
-.debugItem { border: 1px solid #bbb; background-color: #fafafa; margin: 2px; padding: 7px; font-family: sans-serif; font-size: 12px; }
+.debugItem { border: 1px solid #bbb; background-color: #fafafa; margin: 2px; padding: 7px; text-align: left; font-family: sans-serif; font-size: 12px; }
+.debugItem table { font-size: inherit; }
 
 .debugItem.notice { border: 1px solid #bbf; background: url('info.png') no-repeat 5px 5px #eeeeff; }
 .debugItem.warn { border: 1px solid #cc7; background: url('warning.png') no-repeat 5px 5px #ffc; }
