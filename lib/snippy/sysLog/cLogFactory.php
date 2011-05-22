@@ -12,7 +12,6 @@
 namespace snippy\sysLog;
 
 use snippy\sysLog\writers\cLazyConstructWriterProxy;
-
 use snippy\sysLog\writers\cBlackHoleWriter;
 use snippy\sysLog\writers\cFileWriter;
 
@@ -104,11 +103,13 @@ class cLogFactory
 			throw new xLogFactoryException( 'cLogFactory has already been initialized' );
 		}
 
-		$conf['default'] = array(
-			'writer'         => 'stream',
-			'outputFile'     => 'log/%D-global.log',
-			'outputFileDate' => 'Y-m-d'
-		);
+		if( isset( $conf['default'] ) === false ) {
+			$conf['default'] = array(
+				'writer'         => 'file',
+				'outputFile'     => 'log/%D-global.log',
+				'outputFileDate' => 'Y-m-d'
+			);
+		}
 
 		self::$instance = new self( $conf );
 	}
@@ -129,7 +130,7 @@ class cLogFactory
 		}
 		
 		$factory = self::$instance;
-
+		
 		if( isset( $factory->writers[ $moduleName ] ) === false ) {
 			// get module conf
 			$confName = $moduleName;
@@ -139,7 +140,11 @@ class cLogFactory
 				$confName = substr( $confName, 0, $localNameLen );
 			}
 	
-			$conf = $factory->conf[ $confName ] ?: $factory->conf['default'];
+			if( isset( $factory->conf[ $confName ] ) === false ) {
+				$confName = 'default';
+			}
+			
+			$conf = $factory->conf[ $confName ];
 			
 			$factory->writers[ $moduleName ] = new cLazyConstructWriterProxy( $factory, $moduleName, $conf );
 		}
