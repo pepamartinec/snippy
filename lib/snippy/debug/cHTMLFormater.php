@@ -112,8 +112,8 @@ class cHTMLFormater
 			);
 			
 			// source code
-			$fileName = isset( $trace[0]['file'] ) ? $trace[0]['file'] : null;
-			$fileLine = isset( $trace[0]['line'] ) ? $trace[0]['line'] : null;
+			$fileName = isset( $item['file'] ) ? $item['file'] : null;
+			$fileLine = isset( $item['line'] ) ? $item['line'] : null;
 			
 			if( $fileName !== null ) {
 				$id = $this->getNextBlockID();
