@@ -4,7 +4,8 @@
 <phpunit backupGlobals="false"
          backupStaticAttributes="false"
          strict="true"
-         verbose="true">
+         verbose="true"
+         bootstrap="common.php">
   <testsuites>
     <testsuite name="snippy">
       <directory suffix="Test.php">tests</directory>
