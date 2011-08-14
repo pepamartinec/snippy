@@ -11,6 +11,7 @@
 
 namespace snippy\devConsole\panels;
 
+use snippy\debug\iOutputItem;
 use snippy\devConsole\iDevConsolePanel;
 use snippy\debug\iOutputWriter;
 
